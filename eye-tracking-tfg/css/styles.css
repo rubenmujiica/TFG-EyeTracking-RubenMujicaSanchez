@@ -1,0 +1,503 @@
+/* ============================================================
+   styles.css — EyeTrack TFG
+   Paleta oscura profesional con acentos azul/verde
+   ============================================================ */
+
+/* ── Reset y base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:       #0d1117;
+    --bg2:      #161b22;
+    --bg3:      #21262d;
+    --border:   #30363d;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --accent:   #58a6ff;
+    --green:    #3fb950;
+    --red:      #f85149;
+    --yellow:   #d29922;
+    --purple:   #bc8cff;
+    --radius:   10px;
+    --shadow:   0 8px 24px rgba(0,0,0,.4);
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+/* ── Pantallas ────────────────────────────────────────────── */
+.pantalla        { display: none; min-height: 100vh; }
+.pantalla.activa { display: flex; flex-direction: column; }
+
+/* ── Botones ──────────────────────────────────────────────── */
+.btn-primario, .btn-secundario, .btn-grande {
+    border: none; border-radius: var(--radius);
+    cursor: pointer; font-weight: 600; transition: all .15s;
+    font-family: inherit; font-size: 14px;
+}
+.btn-primario  { background: var(--accent);  color: #000; padding: 8px 18px; }
+.btn-secundario{ background: var(--bg3);     color: var(--text); padding: 8px 18px; border: 1px solid var(--border); }
+.btn-grande    { background: var(--green);   color: #000; padding: 14px 36px; font-size: 16px; border-radius: 12px; }
+.btn-primario:hover   { filter: brightness(1.15); }
+.btn-secundario:hover { background: var(--border); }
+.btn-grande:hover     { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* ── PANTALLA 1: INICIO ───────────────────────────────────── */
+#pantalla-inicio {
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    padding: 40px 20px;
+}
+
+.inicio-hero { text-align: center; }
+.inicio-logo { font-size: 64px; margin-bottom: 12px; }
+.inicio-hero h1 { font-size: 42px; font-weight: 700; letter-spacing: -1px; }
+.inicio-hero h1 .accent { color: var(--accent); }
+.inicio-subtitulo { color: var(--muted); margin-top: 8px; font-size: 15px; }
+.inicio-desc { color: var(--text); margin-top: 4px; font-size: 14px; opacity: .7; }
+
+.inicio-motores h2 { text-align: center; font-size: 18px; color: var(--muted); margin-bottom: 20px; font-weight: 500; }
+
+.grid-motores { display: grid; grid-template-columns: repeat(3, 280px); gap: 20px; }
+
+.card-motor {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-align: left;
+    cursor: pointer;
+    color: var(--text);
+    transition: all .2s;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.card-motor:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow); }
+.motor-icon { font-size: 36px; }
+.card-motor h3 { font-size: 18px; }
+.card-motor p  { font-size: 13px; color: var(--muted); }
+
+.motor-badge {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px; margin-top: 6px; text-transform: uppercase;
+    letter-spacing: .5px;
+}
+.recomendado  { background: rgba(63,185,80,.2);  color: var(--green); }
+.experimental { background: rgba(188,140,255,.2); color: var(--purple); }
+.accesibilidad{ background: rgba(210,153,34,.2);  color: var(--yellow); }
+
+/* ── PANTALLA 2: CALIBRACIÓN ──────────────────────────────── */
+#pantalla-calibracion {
+    position: relative;
+    background: #050a10;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Panel central de instrucciones */
+#cal-instrucciones {
+    position: relative; z-index: 10;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 36px;
+    max-width: 500px;
+    width: 90%;
+    text-align: left;
+    box-shadow: var(--shadow);
+}
+#cal-instrucciones h2 { font-size: 20px; margin-bottom: 14px; text-align: center; }
+#cal-instrucciones p  { color: var(--muted); font-size: 14px; margin-bottom: 12px; line-height: 1.6; }
+#cal-instrucciones em { color: var(--text); font-style: normal; }
+
+/* Lista de tips */
+.cal-tips-lista {
+    list-style: none; padding: 0; margin-bottom: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.cal-tips-lista li {
+    font-size: 13px; color: var(--text);
+    background: var(--bg3); border-radius: 8px; padding: 8px 12px;
+    border-left: 3px solid var(--accent);
+}
+
+.cal-subtexto { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 14px !important; }
+
+#cal-instrucciones .btn-grande { width: 100%; text-align: center; justify-content: center; margin-bottom: 10px; }
+
+#btn-omitir-cal {
+    display: block; background: none; border: none;
+    color: var(--muted); font-size: 12px; cursor: pointer;
+    margin: 0 auto; text-decoration: underline;
+}
+#btn-omitir-cal:hover { color: var(--text); }
+
+/* Barra de progreso */
+#cal-barra-wrap {
+    background: var(--bg3); border-radius: 8px; height: 6px;
+    overflow: hidden; margin: 14px 0;
+}
+#cal-barra {
+    height: 100%; background: var(--green); border-radius: 8px;
+    width: 0; transition: width .4s ease;
+}
+
+.cal-tip {
+    font-size: 12px; color: var(--yellow);
+    margin-top: 8px; margin-bottom: 0 !important;
+    text-align: center;
+}
+
+.cal-countdown {
+    font-size: 72px; font-weight: 700; color: var(--accent);
+    margin: 16px 0; line-height: 1; text-align: center; display: block;
+}
+
+/* Punto de calibración — ONE at a time, pulsando */
+.punto-cal {
+    position: absolute; width: 34px; height: 34px;
+    border-radius: 50%; background: var(--red);
+    border: 3px solid white; cursor: pointer;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    animation: pulso-cal 0.9s ease-in-out infinite;
+}
+@keyframes pulso-cal {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(248,81,73,.4), 0 0 18px var(--red); }
+    50%       { box-shadow: 0 0 0 12px rgba(248,81,73,.1), 0 0 28px var(--red); }
+}
+.punto-cal.completo {
+    background: var(--green); border-color: white;
+    box-shadow: 0 0 20px var(--green); animation: none; cursor: default;
+}
+.punto-cal:not(.completo):hover { transform: translate(-50%, -50%) scale(1.1); }
+
+/* Punto MediaPipe — verde (usuario mira, sin clic) */
+.punto-mp {
+    position: absolute; width: 54px; height: 54px;
+    border-radius: 50%; background: var(--green);
+    border: 4px solid white; pointer-events: none;
+    transform: translate(-50%, -50%); z-index: 999;
+    animation: pulso-mp 0.8s ease-in-out infinite;
+}
+@keyframes pulso-mp {
+    0%,100% { box-shadow: 0 0 0 8px rgba(63,185,80,.5), 0 0 30px var(--green); }
+    50%      { box-shadow: 0 0 0 24px rgba(63,185,80,.1), 0 0 50px var(--green); }
+}
+.punto-mp.completo { background: var(--accent); box-shadow: 0 0 30px var(--accent); animation: none; }
+
+/* Cuenta atrás pequeña (MediaPipe) */
+.cal-countdown-sm {
+    font-size: 48px; font-weight: 700; color: var(--green);
+    text-align: center; margin: 10px 0; line-height: 1;
+}
+
+/* Punto de validación — diana azul */
+.punto-val-seq {
+    position: absolute; width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    box-shadow: 0 0 0 6px rgba(88,166,255,.2), 0 0 20px var(--accent);
+    animation: pulso-val 1s ease-in-out infinite;
+    pointer-events: none;
+}
+.punto-val-seq::after {
+    content: ''; position: absolute; inset: 50% 50%;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    transform: translate(-50%, -50%);
+}
+@keyframes pulso-val {
+    0%, 100% { box-shadow: 0 0 0 6px rgba(88,166,255,.2), 0 0 20px var(--accent); }
+    50%       { box-shadow: 0 0 0 14px rgba(88,166,255,.05), 0 0 30px var(--accent); }
+}
+
+/* Cursor de gaze durante validación */
+#cal-cursor-validacion {
+    position: fixed; z-index: 9000;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 140, 0, 0.85);
+    border: 2px solid white;
+    box-shadow: 0 0 12px rgba(255,140,0,.8);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: left .05s, top .05s;
+}
+
+/* Botones de resultado de calibración */
+.cal-resultado-btns {
+    display: flex; flex-direction: column; gap: 10px; margin-top: 16px;
+}
+.cal-resultado-btns .btn-grande { width: 100%; }
+.cal-resultado-btns .btn-secundario { width: 100%; }
+
+/* Preview de cámara */
+#cal-cam-wrap {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 9999;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,.6);
+    background: var(--bg);
+}
+#cal-cam-canvas { display: block; }
+#cal-cam-estado {
+    background: rgba(0,0,0,.7); color: var(--green);
+    font-size: 11px; padding: 4px 8px; text-align: center;
+}
+
+/* ── PANTALLA 3: CONFIGURACIÓN ────────────────────────────── */
+#pantalla-config { padding: 0; overflow-y: auto; }
+
+.config-layout { max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
+
+.config-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 32px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+.config-header h2 { font-size: 22px; }
+
+.config-seccion {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px; margin-bottom: 20px;
+}
+.config-seccion h3 { font-size: 16px; margin-bottom: 14px; color: var(--accent); }
+.config-hint { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+/* Tabs estímulo */
+.tabs-estimulo { display: flex; gap: 8px; margin-bottom: 16px; }
+.tab-btn {
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--muted); padding: 7px 18px; border-radius: 8px;
+    cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s;
+}
+.tab-btn.activo { background: var(--accent); color: #000; border-color: var(--accent); }
+
+.config-panel-estimulo label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.config-panel-estimulo small { display: block; font-size: 11px; color: var(--muted); margin-top: 8px; }
+.config-panel-estimulo.oculto { display: none; }
+
+.input-row { display: flex; gap: 10px; }
+.input-row input { flex: 1; }
+
+input[type="url"], input[type="text"], input[type="number"], input[type="file"] {
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px; padding: 8px 12px;
+    font-size: 14px; font-family: inherit; width: 100%;
+    transition: border-color .15s;
+}
+input:focus { outline: none; border-color: var(--accent); }
+
+.preview-estimulo img, .preview-estimulo video {
+    max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 10px;
+}
+
+/* AOI Editor */
+.aoi-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.aoi-toolbar input { flex: 1; min-width: 180px; }
+
+.aoi-editor-wrap {
+    background: var(--bg); border: 2px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+}
+.aoi-preview-area {
+    position: relative; width: 100%; height: 380px; overflow: hidden;
+    background: repeating-conic-gradient(#1a1f27 0% 25%, #151a21 0% 50%) 0 0 / 20px 20px;
+}
+#aoi-estimulo-preview {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+}
+#aoi-estimulo-preview img,
+#aoi-estimulo-preview video { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.preview-iframe-aoi { width: 100%; height: 380px; border: none; pointer-events: none; }
+
+/* El canvas AOI va encima de la imagen, captura eventos de ratón */
+#aoi-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    z-index: 10;
+    cursor: default;
+}
+
+.aoi-lista { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.aoi-vacia { font-size: 13px; color: var(--muted); font-style: italic; }
+.aoi-chip {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 14px; font-size: 13px;
+}
+.aoi-chip-nombre { font-weight: 600; }
+.aoi-chip small { color: var(--muted); }
+.aoi-chip button {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 15px; line-height: 1; padding: 0 2px;
+}
+.aoi-chip button:hover { color: var(--red); }
+
+/* Parámetros */
+.param-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.param-item label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.param-item input { width: 100%; }
+.param-ayuda {
+    display: block; margin-top: 8px; font-size: 11px;
+    color: var(--muted); line-height: 1.55;
+    border-left: 2px solid var(--border); padding-left: 8px;
+}
+
+.config-footer { margin-top: 28px; display: flex; justify-content: center; }
+
+/* ── PANTALLA 4: GRABACIÓN ────────────────────────────────── */
+#pantalla-grabacion { position: relative; background: #000; overflow: hidden; }
+
+/* Barra de control */
+#barra-grabacion {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(13,17,23,.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px; gap: 16px; height: 56px;
+}
+#barra-izq, #barra-der { display: flex; align-items: center; gap: 14px; }
+#barra-centre { display: flex; gap: 10px; }
+
+.rec-inactivo { color: var(--muted); font-size: 13px; font-weight: 700; }
+.rec-activo   { color: var(--red);   font-size: 13px; font-weight: 700; animation: blink 1s infinite; }
+.rec-pausado  { color: var(--yellow);font-size: 13px; font-weight: 700; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+#grabacion-tiempo { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
+#info-motor, #info-fijaciones, #info-muestras { font-size: 12px; color: var(--muted); }
+
+.btn-rec {
+    background: var(--bg3); color: var(--text); border: 1px solid var(--border);
+    padding: 7px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;
+    font-size: 13px; transition: all .15s;
+}
+.btn-rec:hover { background: var(--border); }
+.btn-rec-stop {
+    background: var(--red); color: white; border: none;
+    padding: 7px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;
+    font-size: 13px; transition: filter .15s;
+}
+.btn-rec-stop:hover { filter: brightness(1.15); }
+
+/* Zona de estímulo */
+#zona-estimulo {
+    position: absolute; top: 56px; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: center;
+}
+.estimulo-frame {
+    width: 100%; height: 100%;
+    border: none; object-fit: contain; display: block;
+}
+.estimulo-frame.oculto { display: none; }
+
+.overlay-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 10;
+}
+
+/* Cursor de mirada */
+#cursor-mirada {
+    position: fixed; z-index: 900;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(88,166,255,.7);
+    border: 2px solid white;
+    box-shadow: 0 0 16px rgba(88,166,255,.8);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: background .15s;
+}
+
+/* ── PANTALLA 5: RESULTADOS ───────────────────────────────── */
+#pantalla-resultados { overflow-y: auto; }
+
+.resultados-layout { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+
+.resultados-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 32px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px;
+}
+.resultados-header h2 { font-size: 22px; }
+.resultados-acciones { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.resultados-seccion { margin-bottom: 32px; }
+.resultados-seccion h3 { font-size: 16px; color: var(--accent); margin-bottom: 16px; }
+
+/* Cards resumen */
+.cards-resumen { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.card-resumen {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 16px; text-align: center;
+}
+.card-valor { font-size: 26px; font-weight: 700; color: var(--accent); }
+.card-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* Leyenda de métricas */
+.leyenda-bloque {
+    margin-top: 16px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px;
+    font-size: 13px; line-height: 1.7; color: var(--muted);
+}
+.leyenda-bloque p { margin: 0 0 6px; }
+.leyenda-bloque p:last-child { margin-bottom: 0; }
+.leyenda-bloque strong { color: var(--text); }
+
+.resultados-subtexto {
+    font-size: 13px; color: var(--muted); line-height: 1.65;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--border); padding-left: 12px;
+}
+.resultados-subtexto strong { color: var(--text); }
+
+/* Tabla AOI */
+.tabla-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead th {
+    background: var(--bg3); padding: 12px 14px;
+    text-align: left; font-size: 12px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .5px;
+    border-bottom: 1px solid var(--border);
+}
+thead th[title] { cursor: help; text-decoration: underline dotted; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:hover { background: var(--bg2); }
+tbody td { padding: 12px 14px; }
+
+.aoi-badge {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    padding: 3px 10px; border-radius: 20px; color: #000;
+}
+
+/* Heatmap / Scanpath */
+.heatmap-container {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; min-height: 350px;
+    display: flex; align-items: center; justify-content: center;
+}
+#heatmap-canvas, #scanpath-canvas { display: block; max-width: 100%; }
+
+/* ── Utilidades ───────────────────────────────────────────── */
+.oculto { display: none !important; }
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }

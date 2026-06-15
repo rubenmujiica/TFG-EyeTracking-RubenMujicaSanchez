@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EyeTrack TFG — Rubén Mújica Sánchez</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js"></script>
+    <!-- WebGazer -->
+    <script src="https://cdn.jsdelivr.net/npm/webgazer@2.1.0/dist/webgazer.js"></script>
+</head>
+<body>
+
+<!-- ===================== PANTALLA 1: INICIO ===================== -->
+<div id="pantalla-inicio" class="pantalla activa">
+    <div class="inicio-hero">
+        <div class="inicio-logo">👁</div>
+        <h1>EyeTrack <span class="accent">TFG</span></h1>
+        <p class="inicio-subtitulo">Plataforma de Eye Tracking Web — Rubén Mújica Sánchez</p>
+        <p class="inicio-desc">Análisis de métricas atencionales mediante seguimiento ocular con cámara web</p>
+    </div>
+
+    <div class="inicio-motores">
+        <h2>Selecciona el motor de seguimiento</h2>
+        <div class="grid-motores">
+            <button class="card-motor" onclick="App.iniciar('webgazer')">
+                <div class="motor-icon">🎯</div>
+                <h3>WebGazer.js</h3>
+                <p>Regresión polinomial. Mayor precisión con calibración completa de 9 puntos.</p>
+                <span class="motor-badge recomendado">Recomendado</span>
+            </button>
+            <button class="card-motor" onclick="App.iniciar('mediapipe')">
+                <div class="motor-icon">👁</div>
+                <h3>MediaPipe Iris</h3>
+                <p>Seguimiento geométrico del iris en tiempo real. Útil para movimientos amplios.</p>
+                <span class="motor-badge experimental">Experimental</span>
+            </button>
+            <button class="card-motor" onclick="App.iniciar('nose')">
+                <div class="motor-icon">🦴</div>
+                <h3>MediaPipe Cabeza</h3>
+                <p>Control por movimiento de cabeza. Referencia de validación y accesibilidad.</p>
+                <span class="motor-badge accesibilidad">Accesibilidad</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== PANTALLA 2: CALIBRACIÓN ===================== -->
+<div id="pantalla-calibracion" class="pantalla">
+    <div id="cal-overlay"></div>
+    <div id="cal-instrucciones" class="cal-panel">
+        <h2>Calibración del sistema</h2>
+        <p>Haz clic <strong>5 veces</strong> en cada punto rojo mientras lo miras fijamente.<br>
+           Mantén la cabeza quieta y los ojos alineados con la cámara.</p>
+        <div id="cal-progreso-texto">Puntos completados: <strong id="cal-count">0</strong> / 9</div>
+        <div id="cal-barra-wrap"><div id="cal-barra"></div></div>
+        <button id="btn-omitir-cal" onclick="Calibracion.omitir()">Omitir calibración (no recomendado)</button>
+    </div>
+    <!-- Los puntos se inyectan dinámicamente -->
+</div>
+
+<!-- ===================== PANTALLA 3: CONFIGURACIÓN ===================== -->
+<div id="pantalla-config" class="pantalla">
+    <div class="config-layout">
+        <header class="config-header">
+            <h2>Configurar experimento</h2>
+            <button class="btn-secundario" onclick="App.volverInicio()">← Reiniciar</button>
+        </header>
+
+        <!-- SECCIÓN A: ESTÍMULO -->
+        <section class="config-seccion">
+            <h3>1. Estímulo</h3>
+            <div class="tabs-estimulo">
+                <button class="tab-btn activo" onclick="Estimulo.seleccionarTipo('url', this)">URL / Web</button>
+                <button class="tab-btn" onclick="Estimulo.seleccionarTipo('imagen', this)">Imagen</button>
+                <button class="tab-btn" onclick="Estimulo.seleccionarTipo('video', this)">Vídeo</button>
+            </div>
+
+            <div id="config-url" class="config-panel-estimulo">
+                <label>URL del sitio web o red social:</label>
+                <div class="input-row">
+                    <input type="url" id="input-url" placeholder="https://www.ejemplo.com" />
+                    <button class="btn-primario" onclick="Estimulo.cargarURL()">Cargar</button>
+                </div>
+                <small>Nota: algunos sitios bloquean la carga en iframe (X-Frame-Options). En ese caso usa capturas de pantalla.</small>
+            </div>
+
+            <div id="config-imagen" class="config-panel-estimulo oculto">
+                <label>Selecciona una imagen:</label>
+                <input type="file" id="input-imagen" accept="image/*" onchange="Estimulo.cargarImagen(this)" />
+                <div id="preview-imagen" class="preview-estimulo"></div>
+            </div>
+
+            <div id="config-video" class="config-panel-estimulo oculto">
+                <label>Selecciona un vídeo:</label>
+                <input type="file" id="input-video" accept="video/*" onchange="Estimulo.cargarVideo(this)" />
+                <div id="preview-video" class="preview-estimulo"></div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN B: AOIs -->
+        <section class="config-seccion">
+            <h3>2. Áreas de Interés (AOI)</h3>
+            <p class="config-hint">Dibuja rectángulos sobre la vista previa del estímulo para definir las AOIs que quieres analizar.</p>
+            <div class="aoi-toolbar">
+                <button class="btn-primario" onclick="AOI.activarDibujo()" id="btn-dibujar-aoi">✏ Dibujar AOI</button>
+                <button class="btn-secundario" onclick="AOI.limpiarTodas()">🗑 Limpiar AOIs</button>
+                <input type="text" id="aoi-nombre" placeholder="Nombre del AOI (ej: Logo, CTA...)" />
+            </div>
+            <div id="contenedor-aoi-editor" class="aoi-editor-wrap">
+                <div id="aoi-preview-area" class="aoi-preview-area">
+                    <div id="aoi-estimulo-preview"></div>
+                    <canvas id="aoi-canvas"></canvas>
+                </div>
+            </div>
+            <div id="aoi-lista" class="aoi-lista"></div>
+        </section>
+
+        <!-- SECCIÓN C: PARÁMETROS -->
+        <section class="config-seccion">
+            <h3>3. Parámetros de detección</h3>
+            <div class="param-grid">
+                <div class="param-item">
+                    <label>Umbral dispersión fijación (px)</label>
+                    <input type="number" id="param-dispersion" value="50" min="10" max="200" />
+                    <small class="param-ayuda">Radio máximo (en píxeles) dentro del cual varios puntos de mirada consecutivos se consideran la <em>misma fijación</em>. Valor bajo → solo fijaciones muy estáticas. Valor alto → agrupa movimientos más amplios como una sola fijación. <strong>Recomendado: 40–60 px.</strong></small>
+                </div>
+                <div class="param-item">
+                    <label>Duración mínima fijación (ms)</label>
+                    <input type="number" id="param-duracion-min" value="100" min="50" max="500" />
+                    <small class="param-ayuda">Tiempo mínimo que la mirada debe permanecer dentro del umbral para registrarse como fijación. Filtra los movimientos oculares rápidos (microsacadas). <strong>Recomendado: 80–150 ms.</strong></small>
+                </div>
+                <div class="param-item">
+                    <label>Ventana de suavizado (frames)</label>
+                    <input type="number" id="param-suavizado" value="6" min="1" max="20" />
+                    <small class="param-ayuda">Número de frames sobre los que se promedia la posición de la mirada para reducir el temblor (jitter). Valor bajo → cursor más reactivo pero ruidoso. Valor alto → cursor más suave pero con algo de retardo. <strong>Recomendado: 4–8 frames.</strong></small>
+                </div>
+            </div>
+        </section>
+
+        <div class="config-footer">
+            <button class="btn-grande" onclick="App.iniciarGrabacion()">▶ Iniciar grabación</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== PANTALLA 4: GRABACIÓN ===================== -->
+<div id="pantalla-grabacion" class="pantalla">
+    <!-- Barra de control -->
+    <div id="barra-grabacion">
+        <div id="barra-izq">
+            <div id="indicador-rec" class="rec-inactivo">⬤ GRABANDO</div>
+            <span id="grabacion-tiempo">00:00</span>
+        </div>
+        <div id="barra-centro">
+            <button id="btn-rec-toggle" class="btn-rec" onclick="Grabacion.toggle()">⏸ Pausar</button>
+            <button class="btn-rec-stop" onclick="Grabacion.detener()">⏹ Detener y ver resultados</button>
+        </div>
+        <div id="barra-der">
+            <span id="info-motor"></span>
+            <span id="info-fijaciones">Fijaciones: 0</span>
+            <span id="info-muestras">Muestras: 0</span>
+        </div>
+    </div>
+
+    <!-- Zona de estímulo -->
+    <div id="zona-estimulo">
+        <iframe id="estimulo-iframe" class="estimulo-frame oculto" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+        <img id="estimulo-imagen" class="estimulo-frame oculto" alt="Estímulo" />
+        <video id="estimulo-video" class="estimulo-frame oculto" controls></video>
+        <!-- Canvas de AOIs y heatmap superpuesto -->
+        <canvas id="canvas-overlay" class="overlay-canvas"></canvas>
+    </div>
+
+    <!-- Cursor de mirada -->
+    <div id="cursor-mirada"></div>
+</div>
+
+<!-- ===================== PANTALLA 5: RESULTADOS ===================== -->
+<div id="pantalla-resultados" class="pantalla">
+    <div class="resultados-layout">
+        <header class="resultados-header">
+            <h2>📊 Resultados del experimento</h2>
+            <div class="resultados-acciones">
+                <button class="btn-primario" onclick="Exportar.CSV()">⬇ Exportar CSV</button>
+                <button class="btn-primario" onclick="Exportar.JSON()">⬇ Exportar JSON</button>
+                <button class="btn-secundario" onclick="App.volverConfig()">← Nueva grabación</button>
+                <button class="btn-secundario" onclick="App.volverInicio()">⟲ Reiniciar</button>
+            </div>
+        </header>
+
+        <!-- Resumen global -->
+        <section class="resultados-seccion">
+            <h3>Resumen global</h3>
+            <div id="resumen-global" class="cards-resumen"></div>
+            <div class="leyenda-bloque">
+                <p><strong>Duración sesión</strong> — Tiempo total transcurrido entre «Iniciar grabación» y «Detener».</p>
+                <p><strong>Total muestras</strong> — Número de coordenadas de mirada capturadas (~60 por segundo con webcam).</p>
+                <p><strong>Frecuencia muestreo</strong> — Muestras por segundo reales durante la grabación. La webcam produce ~60 Hz; valores menores indican carga de CPU alta.</p>
+                <p><strong>Total fijaciones</strong> — Número de fijaciones detectadas con el algoritmo I-DT. Una fijación es un periodo en que la mirada se mantiene estable dentro del umbral de dispersión durante al menos la duración mínima configurada.</p>
+                <p><strong>Total sacadas</strong> — Movimientos rápidos de ojo entre fijaciones. Un número alto indica exploración visual activa del estímulo.</p>
+                <p><strong>Duración media fijación</strong> — Media de cuánto dura cada fijación. Fijaciones largas indican procesamiento cognitivo más profundo de esa zona.</p>
+            </div>
+        </section>
+
+        <!-- Tabla de métricas por AOI -->
+        <section class="resultados-seccion">
+            <h3>Métricas por Área de Interés (AOI)</h3>
+            <div class="leyenda-bloque" style="margin-bottom:14px">
+                <p><strong>T. Primera Fijación</strong> — Tiempo desde el inicio de la grabación hasta que la mirada entra por primera vez en esta AOI. Valor bajo = el elemento capta atención rápidamente.</p>
+                <p><strong>Fijaciones previas</strong> — Cuántas fijaciones se registraron en otras zonas antes de entrar a esta AOI. Indica qué tan pronto se ve el elemento en la secuencia de exploración visual.</p>
+                <p><strong>Nº Fijaciones en AOI</strong> — Total de fijaciones cuyo centroide cae dentro del área. Refleja cuántas veces el usuario vuelve a mirar esta zona.</p>
+                <p><strong>Duración media</strong> — Media de duración de las fijaciones dentro de la AOI. Fijaciones largas sugieren mayor interés o dificultad de procesamiento.</p>
+                <p><strong>Tiempo total</strong> — Suma de todas las fijaciones en la AOI (tiempo de permanencia o <em>dwell time</em>). Es la métrica más directa de cuánta atención recibe el elemento.</p>
+            </div>
+            <div class="tabla-wrap">
+                <table id="tabla-aoi">
+                    <thead>
+                        <tr>
+                            <th>AOI</th>
+                            <th title="Tiempo desde inicio de grabación hasta la primera fijación dentro del AOI">T. Primera Fijación</th>
+                            <th title="Número de fijaciones registradas antes de que la mirada entre al AOI por primera vez">Fijaciones previas</th>
+                            <th title="Total de fijaciones cuyo centroide cae dentro del AOI">Nº Fijaciones</th>
+                            <th title="Duración media de las fijaciones dentro del AOI">Duración media</th>
+                            <th title="Suma de duraciones de todas las fijaciones dentro del AOI">Tiempo total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-aoi-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Heatmap -->
+        <section class="resultados-seccion">
+            <h3>Mapa de calor (Heatmap)</h3>
+            <p class="resultados-subtexto">Muestra la <strong>densidad de muestras de mirada</strong>: cuanto más rojo e intenso, más tiempo pasó la mirada en esa zona. Se calcula sumando gradientes gaussianos centrados en cada muestra raw (~60/s). Es útil para identificar zonas de atracción visual general, independientemente de si hay AOIs definidas.</p>
+            <div id="heatmap-wrap" class="heatmap-container">
+                <canvas id="heatmap-canvas"></canvas>
+            </div>
+        </section>
+
+        <!-- Scanpath (trayectoria de fijaciones) -->
+        <section class="resultados-seccion">
+            <h3>Scanpath — Trayectoria de fijaciones</h3>
+            <p class="resultados-subtexto">Muestra el <strong>orden y duración de las fijaciones</strong>. Cada círculo numerado es una fijación: el número indica el orden cronológico y el tamaño del círculo es proporcional a la duración (círculo más grande = fijación más larga). Las líneas que unen los círculos son las sacadas (movimientos oculares rápidos entre fijaciones). Permite ver qué estrategia de exploración visual siguió el usuario.</p>
+            <div id="scanpath-wrap" class="heatmap-container">
+                <canvas id="scanpath-canvas"></canvas>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Scripts en orden de dependencia -->
+<script src="js/tracker.js"></script>
+<script src="js/metrics.js"></script>
+<script src="js/aoi.js"></script>
+<script src="js/stimulus.js"></script>
+<script src="js/calibration.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
