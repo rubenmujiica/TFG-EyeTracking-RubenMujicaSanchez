@@ -11,12 +11,13 @@
 // FIX: el loop siempre corre; 'activo' solo controla la emisión.
 // ============================================================
 
+//Todas las variable serán privadas
 const Tracker = (() => {
 
     let motorActivo  = null;
     let gazeCallback = null;
     let activo       = false;
-    let loopVivo     = false;   // controla si el loop de MediaPipe vive
+    let loopVivo     = false;   // controla si el loop de MediaPipe vive (solucionar bug)
 
     let bufX = [], bufY = [];
     let ventanaFiltro = 4;
@@ -78,7 +79,7 @@ const Tracker = (() => {
 
     // ── Calibración MediaPipe ────────────────────────────────
 
-    /** Recoge muestras del iris durante `ms` ms y devuelve el promedio */
+    /** Recoge muestras del iris durante `ms` ms y devuelve el promedio sin outliers (parpadeos) */
     function muestrearIris(ms) {
         return new Promise(resolve => {
             const muestras = [];
@@ -87,10 +88,24 @@ const Tracker = (() => {
             }, 33);
             setTimeout(() => {
                 clearInterval(iv);
-                if (!muestras.length) { resolve(null); return; }
+                if (muestras.length < 3) { resolve(null); return; }
+
+                // Rechazo de outliers por mediana + MAD (filtra parpadeos)
+                const xs = muestras.map(m => m.x).sort((a, b) => a - b);
+                const ys = muestras.map(m => m.y).sort((a, b) => a - b);
+                const medX = xs[Math.floor(xs.length / 2)];
+                const medY = ys[Math.floor(ys.length / 2)];
+                const madX = xs.map(v => Math.abs(v - medX)).sort((a,b)=>a-b)[Math.floor(xs.length/2)];
+                const madY = ys.map(v => Math.abs(v - medY)).sort((a,b)=>a-b)[Math.floor(ys.length/2)];
+                const thX = Math.max(madX * 3, 0.005);
+                const thY = Math.max(madY * 3, 0.005);
+                const buenos = muestras.filter(m =>
+                    Math.abs(m.x - medX) <= thX && Math.abs(m.y - medY) <= thY
+                );
+                const pool = buenos.length >= 2 ? buenos : muestras;
                 resolve({
-                    x: muestras.reduce((s, m) => s + m.x, 0) / muestras.length,
-                    y: muestras.reduce((s, m) => s + m.y, 0) / muestras.length
+                    x: pool.reduce((s, m) => s + m.x, 0) / pool.length,
+                    y: pool.reduce((s, m) => s + m.y, 0) / pool.length
                 });
             }, ms);
         });
@@ -120,7 +135,9 @@ const Tracker = (() => {
         webgazer.params.showFaceOverlay        = false;
         webgazer.params.showFaceFeedbackBox    = false;
         webgazer.clearData();
-        webgazer.setRegression('ridge');
+        webgazer.setRegression('ridge'); //Ridge es un tipo de regresión que penaliza los valores extremos para evitar el sobreajuste (overfitting)
+        // Kalman activo desde el inicio (antes de begin) para suavizar desde el primer frame
+        webgazer.applyKalmanFilter(true); //Sirve para suavizar y eliminar temblor basandoe en la velocidad y la inercia de tu mirada anterior
 
         await webgazer.begin();
 
@@ -129,7 +146,9 @@ const Tracker = (() => {
             _emitir(data.x, data.y);
         });
         webgazer.showPredictionPoints(false);
-        webgazer.applyKalmanFilter(true);
+        // WebGazer ya tiene Kalman: reducir ventana propia a 2 durante calibración
+        // (el usuario puede subir esto en los parámetros de grabación)
+        ventanaFiltro = 2;
     }
 
     async function _iniciarWebGazerSilencioso() {
@@ -181,17 +200,24 @@ const Tracker = (() => {
         try {
             if (motorActivo === 'nose') {
                 const n = f[1];
-                if (!calibNariz) { calibNariz = { x: n.x, y: n.y }; return; }
+                // Distancia interocular actual para compensar cambios de distancia a la cámara
+                const iEyeD = Math.abs(f[33].x - f[263].x) || 0.1;
+                if (!calibNariz) { calibNariz = { x: n.x, y: n.y, iEyeD }; return; }
                 if (!activo) return;
-                xT = window.innerWidth  / 2 - (n.x - calibNariz.x) * window.innerWidth  * 7;
-                yT = window.innerHeight / 2 + (n.y - calibNariz.y) * window.innerHeight * 5;
+                // distCorr < 1 si el usuario se acercó (cara más grande), > 1 si se alejó
+                const distCorr = calibNariz.iEyeD / iEyeD;
+                xT = window.innerWidth  / 2 - (n.x - calibNariz.x) * distCorr * window.innerWidth  * 7;
+                yT = window.innerHeight / 2 + (n.y - calibNariz.y) * distCorr * window.innerHeight * 5;
 
             } else if (motorActivo === 'mediapipe') {
-                const iL = f[468], iR = f[473];
-                const wL = Math.abs(f[133].x - f[33].x)  || 0.01;
-                const wR = Math.abs(f[263].x - f[362].x) || 0.01;
-                const relX = ((iL.x - f[33].x) / wL + (iR.x - f[362].x) / wR) / 2;
-                const relY = (iL.y + iR.y) / 2;
+                // Normalizamos ambos ejes respecto al punto medio entre los cantus oculares
+                // externos y a la distancia interocular. Esto hace las features invariantes
+                // ante cambios de posición de la cabeza (arriba/abajo, cerca/lejos).
+                const midX  = (f[33].x + f[263].x) / 2;
+                const midY  = (f[33].y + f[263].y) / 2;
+                const iEyeW = Math.abs(f[33].x - f[263].x) || 0.1;
+                const relX  = ((f[468].x + f[473].x) / 2 - midX) / iEyeW;
+                const relY  = ((f[468].y + f[473].y) / 2 - midY) / iEyeW;
 
                 // Guardar posición cruda SIEMPRE (útil para calibración incluso si !activo)
                 ultimaIris = { x: relX, y: relY };

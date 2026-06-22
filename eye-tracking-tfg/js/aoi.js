@@ -79,18 +79,24 @@ const AOI = (() => {
     // ── Escalado al espacio de pantalla ──────────────────────
 
     function getListaEscalada(rectEstimulo) {
-        const preview = document.getElementById('aoi-preview-area');
-        if (!preview) return lista;
-        const pr = preview.getBoundingClientRect();
-        const scaleX = rectEstimulo.width  / pr.width;
-        const scaleY = rectEstimulo.height / pr.height;
-        return lista.map(a => ({
-            ...a,
-            x: rectEstimulo.left + a.x * scaleX,
-            y: rectEstimulo.top  + a.y * scaleY,
-            w: a.w * scaleX,
-            h: a.h * scaleY
-        }));
+        if (!lista.length) return [];
+        return lista.map(a => {
+            // Usar dimensiones guardadas en el dibujo, NO getBoundingClientRect().
+            // El panel de configuración está oculto cuando empieza la grabación,
+            // por lo que getBoundingClientRect() devolvería 0×0 y el escalado sería Infinity.
+            const pW = a._cw || (canvas ? canvas.width  : 860);
+            const pH = a._ch || (canvas ? canvas.height : 380);
+            if (!pW || !pH) return { ...a };   // fallback seguro
+            const scaleX = rectEstimulo.width  / pW;
+            const scaleY = rectEstimulo.height / pH;
+            return {
+                ...a,
+                x: rectEstimulo.left + a.x * scaleX,
+                y: rectEstimulo.top  + a.y * scaleY,
+                w: a.w * scaleX,
+                h: a.h * scaleY
+            };
+        });
     }
 
     // ── Render en canvas de grabación ────────────────────────
@@ -148,7 +154,11 @@ const AOI = (() => {
             nombre,
             x: Math.round(x), y: Math.round(y),
             w: Math.round(w), h: Math.round(h),
-            color: COLORES[colorIdx % COLORES.length]
+            color: COLORES[colorIdx % COLORES.length],
+            // Guardar dimensiones del canvas en el momento del dibujo.
+            // getListaEscalada las usa para el escalado aunque el panel esté oculto.
+            _cw: canvas.width,
+            _ch: canvas.height
         });
         colorIdx++;
 

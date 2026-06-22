@@ -3,7 +3,7 @@
 //
 // Flujo compartido (WebGazer y MediaPipe):
 //   [Tips + preview cámara]
-//   → Fase 1: calibración (secuencial, 9 pts WG / 5 pts MP)
+//   → Fase 1: calibración (secuencial, 9 pts WG / 9 pts MP)
 //   → Fase 2: validación (5 dianas, usuario ve su cursor)
 //   → Resultado: Continuar | Recalibrar
 // ============================================================
@@ -21,7 +21,7 @@ const Calibracion = (() => {
         { top: '50%', left: '10%' }, { top: '50%', left: '50%' }, { top: '50%', left: '90%' },
         { top: '90%', left: '10%' }, { top: '90%', left: '50%' }, { top: '90%', left: '90%' }
     ];
-    const PUNTOS_VAL = [   // 5 dianas de validación
+    const PUNTOS_VAL = [   // 5 dianas de validación para mejorra la experiencia UX
         { top: '28%', left: '28%' }, { top: '28%', left: '72%' },
         { top: '72%', left: '28%' }, { top: '72%', left: '72%' },
         { top: '50%', left: '50%' }
@@ -232,15 +232,15 @@ const Calibracion = (() => {
         dot.style.left = pos.left;
         document.getElementById('pantalla-calibracion').appendChild(dot);
 
-        _panelFase1MP(idx, 1);
+        _panelFase1MP(idx, 2);
 
-        // Cuenta atrás visual (1 segundo)
-        let c = 1;
+        // Cuenta atrás visual mientras dura muestreo (2 → 1 → ✓)
+        let c = 2;
         const iv = setInterval(() => { c--; _panelFase1MP(idx, c); }, 1000);
 
-        // 0.3 s de estabilización, luego 1.0 s de muestras
-        await _esperar(300);
-        const iris = await Tracker.muestrearIris(1000);
+        // 0.5 s de estabilización (la mirada se asienta), luego 1.5 s de muestras
+        await _esperar(500);
+        const iris = await Tracker.muestrearIris(1500);
         clearInterval(iv);
 
         if (iris) {

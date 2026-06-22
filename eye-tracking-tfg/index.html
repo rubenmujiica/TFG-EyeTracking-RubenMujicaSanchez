@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EyeTrack TFG — Rubén Mújica Sánchez</title>
+    <title>Eye Tracking TFG — Rubén Mújica Sánchez</title>
     <link rel="stylesheet" href="css/styles.css">
     <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
@@ -19,29 +19,23 @@
         <div class="inicio-logo">👁</div>
         <h1>EyeTrack <span class="accent">TFG</span></h1>
         <p class="inicio-subtitulo">Plataforma de Eye Tracking Web — Rubén Mújica Sánchez</p>
-        <p class="inicio-desc">Análisis de métricas atencionales mediante seguimiento ocular con cámara web</p>
+        <p class="inicio-desc">Análisis de métricas mediante seguimiento ocular con cámara web</p>
     </div>
 
     <div class="inicio-motores">
         <h2>Selecciona el motor de seguimiento</h2>
         <div class="grid-motores">
             <button class="card-motor" onclick="App.iniciar('webgazer')">
-                <div class="motor-icon">🎯</div>
                 <h3>WebGazer.js</h3>
-                <p>Regresión polinomial. Mayor precisión con calibración completa de 9 puntos.</p>
-                <span class="motor-badge recomendado">Recomendado</span>
+                <p>Regresión ridge sobre parche ocular. Mayor precisión con calibración completa de 9 puntos.</p>
             </button>
             <button class="card-motor" onclick="App.iniciar('mediapipe')">
-                <div class="motor-icon">👁</div>
                 <h3>MediaPipe Iris</h3>
-                <p>Seguimiento geométrico del iris en tiempo real. Útil para movimientos amplios.</p>
-                <span class="motor-badge experimental">Experimental</span>
+                <p>Regresión cuadrática sobre posición del iris. Sin necesidad de clic durante la calibración.</p>
             </button>
             <button class="card-motor" onclick="App.iniciar('nose')">
-                <div class="motor-icon">🦴</div>
                 <h3>MediaPipe Cabeza</h3>
-                <p>Control por movimiento de cabeza. Referencia de validación y accesibilidad.</p>
-                <span class="motor-badge accesibilidad">Accesibilidad</span>
+                <p>Control por movimiento de cabeza. Calibración instantánea, sin precisión subpixel.</p>
             </button>
         </div>
     </div>
@@ -185,7 +179,6 @@
             <h2>📊 Resultados del experimento</h2>
             <div class="resultados-acciones">
                 <button class="btn-primario" onclick="Exportar.CSV()">⬇ Exportar CSV</button>
-                <button class="btn-primario" onclick="Exportar.JSON()">⬇ Exportar JSON</button>
                 <button class="btn-secundario" onclick="App.volverConfig()">← Nueva grabación</button>
                 <button class="btn-secundario" onclick="App.volverInicio()">⟲ Reiniciar</button>
             </div>

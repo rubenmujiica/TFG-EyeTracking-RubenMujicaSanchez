@@ -58,6 +58,8 @@ const App = (() => {
             const rect = el ? el.getBoundingClientRect()
                             : { left:0, top:0, width: window.innerWidth, height: window.innerHeight };
             aoisEnGrabacion = AOI.getListaEscalada(rect);
+            // Compartir los AOIs escalados con el módulo de exportación
+            Exportar.setAOIs(aoisEnGrabacion);
             _renderOverlayAOIs();
         }, 300);
 
